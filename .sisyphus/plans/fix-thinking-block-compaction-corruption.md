@@ -1,8 +1,9 @@
 # Plan: Fix Thinking Block Corruption During Compaction
 
-**Status:** COMPLETE (Phase 1 + Phase 2 implemented, Phase 3 verification pending smoke test)
+**Status:** COMPLETE — PR opened, pending merge
 **Created:** 2026-02-16
-**Branch:** `bugfix/gee/opus-parsing-issue`
+**Branch:** `bugfix/gee/opus-parsing-issue` (work), `bugfix/fix-thinking-block-compaction` (clean PR branch)
+**PR:** https://github.com/anomalyco/opencode/pull/14393
 **Triggered by:** Sessions crash with `"'thinking' or 'redacted_thinking' blocks in the latest assistant message cannot be modified"` when compaction fires for Claude Opus 4.6 on Bedrock with extended thinking enabled
 
 ---
@@ -339,3 +340,31 @@ Phase 1 is the critical path — it fixes the crash. Phase 2 is a quality improv
 | Copilot `reasoningOpaque` breaks with always-pass metadata       | Copilot already passes `providerMetadata` through its own path — unaffected.                                                   |
 | `reserved` change triggers compaction too early for some models  | Only affects models with very small output limits. The old 20K cap was too low for modern models anyway.                       |
 | Tests don't cover cross-provider compaction (e.g., Opus → GPT-4) | Out of scope — true cross-provider compaction is a larger design issue. Our fix is safe because undefined metadata is a no-op. |
+
+---
+
+## Post-Review Findings (2026-02-20)
+
+### Additional fixes during review
+
+1. **Dead code cleanup** — Removed unused `COMPACTION_BUFFER = 20_000` constant from `compaction.ts`
+2. **Pre-existing bug fix** — The non-`limit.input` path in `isOverflow()` hardcoded `ProviderTransform.maxOutputTokens()` instead of using the `reserved` variable, silently ignoring `config.compaction.reserved`. Fixed to use `reserved` on both paths.
+3. **Test comment corrections** — Updated block comment from present-tense bug description to past-tense regression guard. Fixed incorrect token count ("170K" → "181K").
+
+### Oracle review confirmed
+
+- `providerMetadata: undefined` is safe — AI SDK null-checks before converting to `providerOptions` (except reasoning parts which already set `providerOptions: undefined` unconditionally)
+- `maxOutputTokens()` is capped at 32K via `OUTPUT_TOKEN_MAX`, so the reserved change only shifts compaction by ~12K tokens (32K vs old 20K cap)
+- Provider metadata is namespaced — cross-provider metadata is ignored by non-matching providers
+
+### Related PRs identified
+
+| PR     | Title                                                          | Overlap                                                                           |
+| ------ | -------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| #12131 | preserve redacted_thinking blocks and fix signature validation | Complementary — fixes `trimEnd()` and block reordering, we fix metadata stripping |
+| #14245 | compaction bugs #13946 and #13980                              | Direct overlap — their #13980 fix is identical to our `context - reserved` fix    |
+| #11453 | prevent context overflow during compaction                     | No overlap — adds `truncateForCompaction()`                                       |
+
+### CI note
+
+Typecheck failure on PR is pre-existing on `dev` — `@opencode-ai/enterprise` references `AssistantMessage`, `FileDiff`, `Message`, `Part` from `@opencode-ai/sdk/v2/client` which no longer exports them after commit `4432148` ("sdk: build to dist/ instead of dist/src"). Unrelated to our changes.
