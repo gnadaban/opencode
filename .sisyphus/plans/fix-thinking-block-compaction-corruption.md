@@ -1,6 +1,6 @@
 # Plan: Fix Thinking Block Corruption During Compaction
 
-**Status:** PENDING
+**Status:** COMPLETE (Phase 1 + Phase 2 implemented, Phase 3 verification pending smoke test)
 **Created:** 2026-02-16
 **Branch:** `bugfix/gee/opus-parsing-issue`
 **Triggered by:** Sessions crash with `"'thinking' or 'redacted_thinking' blocks in the latest assistant message cannot be modified"` when compaction fires for Claude Opus 4.6 on Bedrock with extended thinking enabled
@@ -236,7 +236,7 @@ Use the existing test model fixture (`model` at line 7) and create a second mode
 
 ## Phase 2: Fix Compaction Overflow Detection (Bug A)
 
-### Task 2.1: Fix `isOverflow()` to reserve output headroom when `limit.input` is set ☐
+### Task 2.1: Fix `isOverflow()` to reserve output headroom when `limit.input` is set ☑
 
 **Priority:** Medium — the existing BUG tests already document this
 **Files:** `packages/opencode/src/session/compaction.ts`
@@ -269,11 +269,11 @@ This removes the `Math.min(COMPACTION_BUFFER, ...)` that caps the buffer at 20K.
 
 **Success criteria:**
 
-- [ ] All three existing BUG tests (lines 128, 154, 174) now pass
-- [ ] Existing passing tests still pass
-- [ ] Models with `limit.input` and without trigger compaction at similar thresholds
+- [x] All three existing BUG tests (lines 128, 154, 174) now pass
+- [x] Existing passing tests still pass
+- [x] Models with `limit.input` and without trigger compaction at similar thresholds
 
-### Task 2.2: Update compaction tests ☐
+### Task 2.2: Update compaction tests ☑
 
 **Priority:** Medium
 **Files:** `packages/opencode/test/session/compaction.test.ts`
@@ -283,8 +283,8 @@ This removes the `Math.min(COMPACTION_BUFFER, ...)` that caps the buffer at 20K.
 
 **Success criteria:**
 
-- [ ] All tests in `compaction.test.ts` pass
-- [ ] No test marked as BUG remains
+- [x] All tests in `compaction.test.ts` pass
+- [x] No test marked as BUG remains
 
 ---
 
