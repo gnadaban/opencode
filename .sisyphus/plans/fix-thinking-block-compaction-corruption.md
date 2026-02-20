@@ -107,7 +107,7 @@ Setting `limit.context: 1048576` in `opencode.json` for the model avoids Bug A b
 
 This is the critical fix. The `differentModel` guard in `toModelMessages()` is too aggressive — it strips all provider metadata including cryptographic signatures when the model doesn't match exactly.
 
-### Task 1.1: Always preserve `providerMetadata` on reasoning parts ☐
+### Task 1.1: Always preserve `providerMetadata` on reasoning parts ☑
 
 **Priority:** High — the core fix
 **Files:** `packages/opencode/src/session/message-v2.ts`
@@ -140,10 +140,10 @@ For non-Anthropic providers that don't use reasoning signatures, `part.metadata`
 
 **Success criteria:**
 
-- [ ] Reasoning parts always carry their original `providerMetadata` in `toModelMessages()` output
-- [ ] Non-Anthropic models unaffected (`metadata` is undefined, field spreads as no-op)
+- [x] Reasoning parts always carry their original `providerMetadata` in `toModelMessages()` output
+- [x] Non-Anthropic models unaffected (`metadata` is undefined, field spreads as no-op)
 
-### Task 1.2: Always preserve `providerMetadata` on text parts ☐
+### Task 1.2: Always preserve `providerMetadata` on text parts ☑
 
 **Priority:** High — same issue for text parts with thinking metadata
 **Files:** `packages/opencode/src/session/message-v2.ts`
@@ -172,10 +172,10 @@ if (part.type === "text")
 
 **Success criteria:**
 
-- [ ] Text parts always carry their original `providerMetadata`
-- [ ] No regression for non-Anthropic providers
+- [x] Text parts always carry their original `providerMetadata`
+- [x] No regression for non-Anthropic providers
 
-### Task 1.3: Always preserve `callProviderMetadata` on tool parts ☐
+### Task 1.3: Always preserve `callProviderMetadata` on tool parts ☑
 
 **Priority:** Medium — tool parts also stripped
 **Files:** `packages/opencode/src/session/message-v2.ts`
@@ -192,10 +192,10 @@ callProviderMetadata: part.metadata,
 
 **Success criteria:**
 
-- [ ] Tool parts (completed, error, pending/running) always carry `callProviderMetadata`
-- [ ] No regression for non-Anthropic providers
+- [x] Tool parts (completed, error, pending/running) always carry `callProviderMetadata`
+- [x] No regression for non-Anthropic providers
 
-### Task 1.4: Remove or simplify `differentModel` variable ☐
+### Task 1.4: Remove or simplify `differentModel` variable ☑
 
 **Priority:** Low — cleanup after 1.1-1.3
 **Files:** `packages/opencode/src/session/message-v2.ts`
@@ -207,10 +207,10 @@ After tasks 1.1-1.3, the `differentModel` variable (line 589) may no longer be u
 
 **Success criteria:**
 
-- [ ] No dead code remains
-- [ ] `lsp_diagnostics` clean on file
+- [x] No dead code remains
+- [x] `lsp_diagnostics` clean on file
 
-### Task 1.5: Add unit tests for metadata preservation ☐
+### Task 1.5: Add unit tests for metadata preservation ☑
 
 **Priority:** High — regression prevention
 **Files:** `packages/opencode/test/session/message-v2.test.ts`
@@ -229,8 +229,8 @@ Use the existing test model fixture (`model` at line 7) and create a second mode
 
 **Success criteria:**
 
-- [ ] All 5 test cases pass
-- [ ] Tests use existing fixture patterns from the test file
+- [x] All 5 test cases pass
+- [x] Tests use existing fixture patterns from the test file
 
 ---
 
@@ -290,22 +290,22 @@ This removes the `Math.min(COMPACTION_BUFFER, ...)` that caps the buffer at 20K.
 
 ## Phase 3: Verification
 
-### Task 3.1: Run full test suite ☐
+### Task 3.1: Run full test suite ☑
 
 **Priority:** High
 **Command:** `bun test` from `packages/opencode`
 
-- [ ] `test/session/message-v2.test.ts` passes
-- [ ] `test/session/compaction.test.ts` passes
-- [ ] `test/session/revert-compact.test.ts` passes
-- [ ] No regressions in other session tests
+- [x] `test/session/message-v2.test.ts` passes (23 pass, 0 fail)
+- [x] `test/session/compaction.test.ts` passes (24 pass, 0 fail)
+- [x] `test/session/revert-compact.test.ts` passes
+- [x] No regressions — 49 tests across 3 files, 91 expect() calls, 0 failures
 
-### Task 3.2: LSP diagnostics clean ☐
+### Task 3.2: LSP diagnostics clean ☑
 
 **Priority:** High
 
-- [ ] `packages/opencode/src/session/message-v2.ts` — no errors
-- [ ] `packages/opencode/src/session/compaction.ts` — no errors
+- [x] `packages/opencode/src/session/message-v2.ts` — no diagnostics found
+- [x] `packages/opencode/src/session/compaction.ts` — no diagnostics found
 
 ### Task 3.3: Manual smoke test ☐
 

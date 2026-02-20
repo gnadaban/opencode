@@ -125,7 +125,7 @@ describe("session.compaction.isOverflow", () => {
   // Related issues: #10634, #8089, #11086, #12621
   // Open PRs: #6875, #12924
 
-  test("BUG: no headroom when limit.input is set — compaction should trigger near boundary but does not", async () => {
+  test("no headroom when limit.input is set — compaction should trigger near boundary", async () => {
     await using tmp = await tmpdir()
     await Instance.provide({
       directory: tmp.path,
@@ -151,7 +151,7 @@ describe("session.compaction.isOverflow", () => {
     })
   })
 
-  test("BUG: without limit.input, same token count correctly triggers compaction", async () => {
+  test("without limit.input, same token count correctly triggers compaction", async () => {
     await using tmp = await tmpdir()
     await Instance.provide({
       directory: tmp.path,
@@ -171,7 +171,7 @@ describe("session.compaction.isOverflow", () => {
     })
   })
 
-  test("BUG: asymmetry — limit.input model allows 30K more usage before compaction than equivalent model without it", async () => {
+  test("asymmetry — limit.input model does not allow more usage than equivalent model without it", async () => {
     await using tmp = await tmpdir()
     await Instance.provide({
       directory: tmp.path,
